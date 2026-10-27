@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="h-full bg-steel-950">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AçoSmart ERP - Gestão Industrial Interna</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts (Inter) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        steel: {
+                            50: '#f4f6f8',
+                            100: '#e5e9ee',
+                            200: '#cdd5e0',
+                            300: '#a6b5c7',
+                            400: '#798ea8',
+                            500: '#586e8a',
+                            600: '#43556d',
+                            700: '#364458',
+                            800: '#2f3b4c',
+                            900: '#1e2532',
+                            950: '#111620',
+                        },
+                        brand: {
+                            blue: '#0052cc',
+                            lightBlue: '#0065ff',
+                            darkBlue: '#00388b',
+                            accent: '#00b8d9'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #111620;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #364458;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #0052cc;
+        }
+        .metal-card {
+            background: linear-gradient(145deg, #2f3b4c, #1e2532);
+            box-shadow: 4px 4px 12px rgba(0,0,0,0.3), -2px -2px 8px rgba(255,255,255,0.02);
+        }
+    </style>
+</head>
+<body class="bg-steel-950 text-slate-100 font-sans min-h-full flex flex-col selection:bg-brand-blue selection:text-white">
+
+    <!-- CABEÇALHO SUPERIOR EXCLUSIVO PARA LOGO E USUÁRIO (SEPARADO DA BARRA DE PÁGINAS) -->
+    <div class="bg-steel-950 border-b border-steel-800 py-3 px-4 sm:px-8">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            
+            <!-- LOGO AÇOSMART -->
+            <div class="flex items-center gap-3 cursor-pointer" onclick="switchPage('dashboard')">
+                <div class="w-11 h-11 bg-gradient-to-tr from-brand-darkBlue via-brand-blue to-brand-lightBlue rounded-xl flex items-center justify-center shadow-lg shadow-brand-blue/30 border border-brand-lightBlue/40">
+                    <i class="fa-solid fa-layer-group text-white text-xl"></i>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-2xl font-black tracking-wider bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-200 to-steel-300">
+                            AÇO<span class="text-brand-lightBlue">SMART</span>
+                        </span>
+                        <span class="bg-brand-blue/30 border border-brand-blue/50 text-brand-lightBlue text-[10px] font-bold px-2 py-0.5 rounded-full">ERP v4.0</span>
+                    </div>
+                    <span class="block text-[10px] text-slate-400 tracking-widest uppercase font-bold">Gestão Inteligente Metalúrgica</span>
+                </div>
+            </div>
+
+            <!-- PERFIL E AÇÕES RÁPIDAS -->
+            <div class="flex items-center gap-4">
+                <div class="hidden sm:flex flex-col text-right">
+                    <span class="text-xs font-bold text-white">Op. Carlos Andrade</span>
+                    <span class="text-[10px] text-slate-400" id="current-time">--:--:--</span>
+                </div>
+                <div class="w-9 h-9 rounded-xl bg-brand-blue/20 border border-brand-blue/50 text-brand-lightBlue flex items-center justify-center font-bold text-sm">
+                    CA
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- BARRA NAVEGAÇÃO DE PÁGINAS NO TOPO (INDEPENDENTE DA LOGO) -->
+    <header class="sticky top-0 z-50 bg-steel-900 border-b border-steel-800 shadow-xl">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-12">
+
+                <!-- MENU DE NAVEGAÇÃO DE PÁGINAS -->
+                <nav class="hidden md:flex items-center space-x-1 h-full">
+                    <button onclick="switchPage('dashboard')" id="nav-dashboard" class="nav-btn h-full px-4 text-xs font-semibold transition-all text-brand-lightBlue bg-steel-800 border-b-2 border-brand-blue flex items-center gap-2">
+                        <i class="fa-solid fa-chart-line"></i> Painel Geral
+                    </button>
+                    <button onclick="switchPage('status')" id="nav-status" class="nav-btn h-full px-4 text-xs font-semibold text-slate-300 hover:text-white hover:bg-steel-800 transition-all flex items-center gap-2">
+                        <i class="fa-solid fa-industry"></i> Status da Planta
+                    </button>
+                    <button onclick="switchPage('ordens')" id="nav-ordens" class="nav-btn h-full px-4 text-xs font-semibold text-slate-300 hover:text-white hover:bg-steel-800 transition-all flex items-center gap-2">
+                        <i class="fa-solid fa-clipboard-list"></i> Ordens de Produção
+                    </button>
+                    <button onclick="switchPage('maquinas')" id="nav-maquinas" class="nav-btn h-full px-4 text-xs font-semibold text-slate-300 hover:text-white hover:bg-steel-800 transition-all flex items-center gap-2">
+                        <i class="fa-solid fa-gears"></i> Monitor de Máquinas
+                    </button>
+                    <button onclick="switchPage('estoque')" id="nav-estoque" class="nav-btn h-full px-4 text-xs font-semibold text-slate-300 hover:text-white hover:bg-steel-800 transition-all flex items-center gap-2">
+                        <i class="fa-solid fa-boxes-stacked"></i> Estoque de Chapas
+                    </button>
+                    <button onclick="switchPage('qualidade')" id="nav-qualidade" class="nav-btn h-full px-4 text-xs font-semibold text-slate-300 hover:text-white hover:bg-steel-800 transition-all flex items-center gap-2">
+                        <i class="fa-solid fa-circle-check"></i> Qualidade & ISO
+                    </button>
+                </nav>
+
+                <!-- BOTÃO DE MENU MOBILE -->
+                <div class="md:hidden flex items-center justify-between w-full">
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Navegação</span>
+                    <button onclick="toggleMobileMenu()" class="text-slate-300 hover:text-white p-1.5 rounded-lg bg-steel-800">
+                        <i class="fa-solid fa-bars text-base"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- DROPDOWN MOBILE -->
+        <div id="mobile-menu" class="hidden md:hidden bg-steel-900 border-b border-steel-800 px-4 py-3 space-y-2">
+            <button onclick="switchPage('dashboard'); toggleMobileMenu();" class="w-full text-left px-3 py-2 rounded-lg text-xs font-medium text-white bg-steel-800 flex items-center gap-2">
+                <i class="fa-solid fa-chart-line text-brand-lightBlue"></i> Painel Geral
+            </button>
+            <button onclick="switchPage('status'); toggleMobileMenu();" class="w-full text-left px-3 py-2 rounded-lg text-xs font-medium text-slate-300 hover:bg-steel-800 flex items-center gap-2">
+                <i class="fa-solid fa-industry text-brand-lightBlue"></i> Status da Planta
+            </button>
+            <button onclick="switchPage('ordens'); toggleMobileMenu();" class="w-full text-left px-3 py-2 rounded-lg text-xs font-medium text-slate-300 hover:bg-steel-800 flex items-center gap-2">
+                <i class="fa-solid fa-clipboard-list text-brand-lightBlue"></i> Ordens de Produção
+            </button>
+            <button onclick="switchPage('maquinas'); toggleMobileMenu();" class="w-full text-left px-3 py-2 rounded-lg text-xs font-medium text-slate-300 hover:bg-steel-800 flex items-center gap-2">
+                <i class="fa-solid fa-gears text-brand-lightBlue"></i> Monitor de Máquinas
+            </button>
+            <button onclick="switchPage('estoque'); toggleMobileMenu();" class="w-full text-left px-3 py-2 rounded-lg text-xs font-medium text-slate-300 hover:bg-steel-800 flex items-center gap-2">
+                <i class="fa-solid fa-boxes-stacked text-brand-lightBlue"></i> Estoque de Chapas
+            </button>
+            <button onclick="switchPage('qualidade'); toggleMobileMenu();" class="w-full text-left px-3 py-2 rounded-lg text-xs font-medium text-slate-300 hover:bg-steel-800 flex items-center gap-2">
+                <i class="fa-solid fa-circle-check text-brand-lightBlue"></i> Qualidade & ISO
+            </button>
+        </div>
+    </header>
+
+    <!-- CONTEÚDO PRINCIPAL DAS PÁGINAS -->
+    <main class="flex-grow p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto">
+
+        <!-- PÁGINA 1: PAINEL GERAL (DASHBOARD) -->
+        <section id="page-dashboard" class="page-content block space-y-6">
+            
+            <!-- TÍTULO DA PÁGINA E FILTROS DE PERÍODO -->
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-steel-800 pb-4">
+                <div>
+                    <h1 class="text-2xl font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-chart-line text-brand-lightBlue"></i> Painel Operacional da Fábrica
+                    </h1>
+                    <p class="text-xs text-slate-400 mt-0.5">Visão em tempo real das linhas de corte, dobra e solda.</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="text-xs text-slate-400">Turno Atual:</span>
+                    <select class="bg-steel-900 border border-steel-700 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-brand-blue">
+                        <option>Turno A (06:00 - 14:00)</option>
+                        <option>Turno B (14:00 - 22:00)</option>
+                        <option>Turno C (22:00 - 06:00)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- CARDS DE METRICAS OPERACIONAIS -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="metal-card rounded-xl p-5 border border-steel-700/80">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-semibold uppercase text-slate-400">Aço Processado Hoje</span>
+                        <div class="w-8 h-8 rounded-lg bg-brand-blue/20 flex items-center justify-center text-brand-lightBlue">
+                            <i class="fa-solid fa-weight-hanging text-sm"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3 flex items-baseline justify-between">
+                        <span class="text-2xl font-extrabold text-white">18.4 Ton</span>
+                        <span class="text-xs font-medium text-emerald-400"><i class="fa-solid fa-arrow-up"></i> +12% vs ontem</span>
+                    </div>
+                    <div class="w-full bg-steel-800 h-1.5 rounded-full mt-3 overflow-hidden">
+                        <div class="bg-brand-lightBlue h-full rounded-full" style="width: 75%"></div>
+                    </div>
+                </div>
+
+                <div class="metal-card rounded-xl p-5 border border-steel-700/80">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-semibold uppercase text-slate-400">OPs em Andamento</span>
+                        <div class="w-8 h-8 rounded-lg bg-brand-blue/20 flex items-center justify-center text-brand-lightBlue">
+                            <i class="fa-solid fa-spinner text-sm animate-spin"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3 flex items-baseline justify-between">
+                        <span class="text-2xl font-extrabold text-white">14 OPs</span>
+                        <span class="text-xs font-medium text-slate-400">3 Críticas</span>
+                    </div>
+                    <div class="w-full bg-steel-800 h-1.5 rounded-full mt-3 overflow-hidden">
+                        <div class="bg-amber-500 h-full rounded-full" style="width: 60%"></div>
+                    </div>
+                </div>
+
+                <div class="metal-card rounded-xl p-5 border border-steel-700/80">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-semibold uppercase text-slate-400">Eficiência Geral (OEE)</span>
+                        <div class="w-8 h-8 rounded-lg bg-brand-blue/20 flex items-center justify-center text-brand-lightBlue">
+                            <i class="fa-solid fa-gauge-high text-sm"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3 flex items-baseline justify-between">
+                        <span class="text-2xl font-extrabold text-emerald-400">89.2%</span>
+                        <span class="text-xs font-medium text-emerald-400"><i class="fa-solid fa-check"></i> Meta 85%</span>
+                    </div>
+                    <div class="w-full bg-steel-800 h-1.5 rounded-full mt-3 overflow-hidden">
+                        <div class="bg-emerald-500 h-full rounded-full" style="width: 89%"></div>
+                    </div>
+                </div>
+
+                <div class="metal-card rounded-xl p-5 border border-steel-700/80">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-semibold uppercase text-slate-400">Índice de Refugo</span>
+                        <div class="w-8 h-8 rounded-lg bg-red-500/20 flex items-center justify-center text-red-400">
+                            <i class="fa-solid fa-dumpster text-sm"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3 flex items-baseline justify-between">
+                        <span class="text-2xl font-extrabold text-white">1.1%</span>
+                        <span class="text-xs font-medium text-emerald-400"><i class="fa-solid fa-arrow-down"></i> -0.4%</span>
+                    </div>
+                    <div class="w-full bg-steel-800 h-1.5 rounded-full mt-3 overflow-hidden">
+                        <div class="bg-emerald-500 h-full rounded-full" style="width: 25%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TABELA DE STATUS DE MÁQUINAS E RESUMO DE OPs -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                
+                <!-- STATUS DAS MÁQUINAS -->
+                <div class="lg:col-span-7 metal-card rounded-2xl p-5 border border-steel-700/80 space-y-4">
+                    <div class="flex items-center justify-between border-b border-steel-800 pb-3">
+                        <h3 class="font-bold text-white text-base flex items-center gap-2">
+                            <i class="fa-solid fa-bolt text-brand-lightBlue"></i> Status das Máquinas CNC
+                        </h3>
+                        <button onclick="switchPage('maquinas')" class="text-xs text-brand-lightBlue hover:underline">Ver todas</button>
+                    </div>
+
+                    <div class="space-y-3">
+                        <div class="bg-steel-900/80 p-3.5 rounded-xl border border-steel-800 flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <span class="w-3 h-3 rounded-full bg-emerald-500 shadow-lg shadow-emerald-500/50"></span>
+                                <div>
+                                    <h4 class="text-sm font-bold text-white">Laser Fiber 12kW (Laser-01)</h4>
+                                    <p class="text-xs text-slate-400">OP #4092 - Chapa Inox 304 8mm</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-xs font-bold text-emerald-400 bg-emerald-950/60 border border-emerald-800 px-2 py-0.5 rounded">Em Operação</span>
+                                <p class="text-[10px] text-slate-400 mt-1">Conclusão: 78%</p>
+                            </div>
+                        </div>
+
+                        <div class="bg-steel-900/80 p-3.5 rounded-xl border border-steel-800 flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <span class="w-3 h-3 rounded-full bg-emerald-500 shadow-lg shadow-emerald-500/50"></span>
+                                <div>
+                                    <h4 class="text-sm font-bold text-white">Laser Fiber 6kW (Laser-02)</h4>
+                                    <p class="text-xs text-slate-400">OP #4095 - Chapa Carbono SAE 1020 4mm</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-xs font-bold text-emerald-400 bg-emerald-950/60 border border-emerald-800 px-2 py-0.5 rounded">Em Operação</span>
+                                <p class="text-[10px] text-slate-400 mt-1">Conclusão: 42%</p>
+                            </div>
+                        </div>
+
+                        <div class="bg-steel-900/80 p-3.5 rounded-xl border border-steel-800 flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <span class="w-3 h-3 rounded-full bg-amber-500 shadow-lg shadow-amber-500/50"></span>
+                                <div>
+                                    <h4 class="text-sm font-bold text-white">Dobradeira CNC 400T (Dobra-02)</h4>
+                                    <p class="text-xs text-slate-400">Ajuste de Ferramental / Setup</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-xs font-bold text-amber-400 bg-amber-950/60 border border-amber-800 px-2 py-0.5 rounded">Setup / Ajuste</span>
+                                <p class="text-[10px] text-slate-400 mt-1">Previsão: 15 min</p>
+                            </div>
+                        </div>
+
+                        <div class="bg-steel-900/80 p-3.5 rounded-xl border border-steel-800 flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <span class="w-3 h-3 rounded-full bg-red-500 shadow-lg shadow-red-500/50"></span>
+                                <div>
+                                    <h4 class="text-sm font-bold text-white">Centro Usinagem 5 Eixos (CNC-01)</h4>
+                                    <p class="text-xs text-slate-400">Manutenção Não Programada (Troca de Broca)</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-xs font-bold text-red-400 bg-red-950/60 border border-red-800 px-2 py-0.5 rounded">Interrompida</span>
+                                <p class="text-[10px] text-slate-400 mt-1">Técnico Alocado</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ALERTAS E OP PRIORITÁRIAS -->
+                <div class="lg:col-span-5 metal-card rounded-2xl p-5 border border-steel-700/80 space-y-4">
+                    <div class="flex items-center justify-between border-b border-steel-800 pb-3">
+                        <h3 class="font-bold text-white text-base flex items-center gap-2">
+                            <i class="fa-solid fa-bell text-brand-lightBlue"></i> Alertas Internos do Sistema
+                        </h3>
+                        <span class="text-xs bg-brand-blue/30 text-brand-lightBlue font-bold px-2 py-0.5 rounded">3 novos</span>
+                    </div>
+
+                    <div class="space-y-3 text-xs">
+                        <div class="p-3 bg-red-950/40 border-l-4 border-red-500 rounded-r-lg text-slate-200">
+                            <p class="font-bold text-red-400">Estoque Crítico</p>
+                            <p class="text-slate-300 mt-0.5">Chapa de Inox 316L 12mm atingiu o limite mínimo (Apenas 3 unidades em estoque).</p>
+                        </div>
+
+                        <div class="p-3 bg-amber-950/40 border-l-4 border-amber-500 rounded-r-lg text-slate-200">
+                            <p class="font-bold text-amber-400">OP Atrasada - Cliente Votorantim</p>
+                            <p class="text-slate-300 mt-0.5">OP #4088 (Estrutura Galpão B) excedeu o tempo estimado no setor de solda.</p>
+                        </div>
+
+                        <div class="p-3 bg-blue-950/40 border-l-4 border-brand-blue rounded-r-lg text-slate-200">
+                            <p class="font-bold text-brand-lightBlue">Aprovação de Qualidade</p>
+                            <p class="text-slate-300 mt-0.5">Lote #9921 inspecionado e liberado para expedição.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- NOVA PÁGINA: STATUS DA PLANTA (INFORMÁTICO & OPERACIONAL) -->
+        <section id="page-status" class="page-content hidden space-y-6">
+            <div class="border-b border-steel-800 pb-4">
+                <h1 class="text-2xl font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-industry text-brand-lightBlue"></i> Status da Planta & Infraestrutura
+                </h1>
+                <p class="text-xs text-slate-400 mt-0.5">Informações completas sobre turnos, capacidade produtiva e manutenções ativas.</p>
+            </div>
+
+            <!-- CARDS DE INFORMAÇÕES GERAIS -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="metal-card rounded-2xl p-5 border border-steel-700/80 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-slate-400 uppercase">Planta Principal</span>
+                        <span class="flex items-center gap-1.5 text-xs text-emerald-400 font-bold bg-emerald-950/80 px-2 py-0.5 rounded border border-emerald-800">
+                            <i class="fa-solid fa-circle text-[8px] animate-pulse"></i> Operando
+                        </span>
+                    </div>
+                    <h3 class="text-lg font-bold text-white">Turno A (Atual)</h3>
+                    <div class="text-xs text-slate-300 space-y-1">
+                        <p>• <strong>Horário:</strong> 06:00 - 14:00</p>
+                        <p>• <strong>Supervisão:</strong> Eng. Roberto Lima</p>
+                        <p>• <strong>Operadores Ativos:</strong> 42 colaboradores</p>
+                    </div>
+                </div>
+
+                <div class="metal-card rounded-2xl p-5 border border-steel-700/80 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-slate-400 uppercase">Parque CNC</span>
+                        <span class="text-xs text-brand-lightBlue font-bold bg-brand-blue/20 px-2 py-0.5 rounded border border-brand-blue/40">Alta Carga</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-white">Carga Operacional: 84%</h3>
+                    <div class="w-full bg-steel-800 h-2 rounded-full overflow-hidden my-2">
+                        <div class="bg-brand-lightBlue h-full rounded-full" style="width: 84%"></div>
+                    </div>
+                    <p class="text-xs text-slate-400">Capacidade reservada para OPs prioritárias de aço inoxidável e estruturas soldadas.</p>
+                </div>
+
+                <div class="metal-card rounded-2xl p-5 border border-steel-700/80 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-slate-400 uppercase">Manutenção Preventiva</span>
+                        <span class="text-xs text-amber-400 font-bold bg-amber-950/80 px-2 py-0.5 rounded border border-amber-800">Em Andamento</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-white">Dobradeira CNC-02</h3>
+                    <div class="text-xs text-slate-300 space-y-1">
+                        <p>• <strong>Tipo:</strong> Troca de óleo hidráulico & calibragem</p>
+                        <p>• <strong>Previsão Término:</strong> 40 minutos</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DETALHAMENTO DE INFRAESTRUTURA -->
+            <div class="metal-card rounded-2xl p-6 border border-steel-700/80 space-y-4">
+                <h3 class="text-base font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-server text-brand-lightBlue"></i> Sistemas de Apoio Industrial & Servidores
+                </h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
+                    <div class="bg-steel-900 p-4 rounded-xl border border-steel-800">
+                        <span class="text-slate-400 font-medium">Servidor ERP</span>
+                        <p class="text-sm font-bold text-emerald-400 mt-1">PRD-SP-01 (12ms)</p>
+                    </div>
+                    <div class="bg-steel-900 p-4 rounded-xl border border-steel-800">
+                        <span class="text-slate-400 font-medium">Rede de Sensores IoT</span>
+                        <p class="text-sm font-bold text-emerald-400 mt-1">Online (99.8%)</p>
+                    </div>
+                    <div class="bg-steel-900 p-4 rounded-xl border border-steel-800">
+                        <span class="text-slate-400 font-medium">Compressor Central</span>
+                        <p class="text-sm font-bold text-white mt-1">7.8 Bar (Normal)</p>
+                    </div>
+                    <div class="bg-steel-900 p-4 rounded-xl border border-steel-800">
+                        <span class="text-slate-400 font-medium">Tanque Nitrogênio N2</span>
+                        <p class="text-sm font-bold text-amber-400 mt-1">68% Capacidade</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PÁGINA 2: ORDENS DE PRODUÇÃO (OPs) -->
+        <section id="page-ordens" class="page-content hidden space-y-6">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-steel-800 pb-4">
+                <div>
+                    <h1 class="text-2xl font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-clipboard-list text-brand-lightBlue"></i> Gestão de Ordens de Produção (OP)
+                    </h1>
+                    <p class="text-xs text-slate-400 mt-0.5">Acompanhamento do fluxo produtivo do corte à pintura.</p>
+                </div>
+                <button onclick="openNewOpModal()" class="px-4 py-2 bg-gradient-to-r from-brand-blue to-brand-lightBlue hover:brightness-110 text-white font-bold text-xs rounded-lg shadow-lg transition-all flex items-center gap-2">
+                    <i class="fa-solid fa-plus"></i> Cadastrar Nova OP
+                </button>
+            </div>
+
+            <!-- FILTROS E BUSCA DE OP -->
+            <div class="bg-steel-900 p-4 rounded-xl border border-steel-800 flex flex-wrap gap-3 items-center justify-between">
+                <div class="flex items-center gap-2 flex-grow max-w-md">
+                    <i class="fa-solid fa-magnifying-glass text-slate-400"></i>
+                    <input type="text" id="search-op" placeholder="Buscar por Nº da OP, Cliente ou Material..." class="w-full bg-steel-950 border border-steel-700 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-brand-blue">
+                </div>
+                <div class="flex gap-2">
+                    <button class="px-3 py-1.5 bg-steel-800 text-white rounded-lg text-xs font-semibold hover:bg-brand-blue transition-colors">Todas</button>
+                    <button class="px-3 py-1.5 bg-steel-800 text-slate-300 rounded-lg text-xs font-semibold hover:bg-brand-blue transition-colors">Em Laser</button>
+                    <button class="px-3 py-1.5 bg-steel-800 text-slate-300 rounded-lg text-xs font-semibold hover:bg-brand-blue transition-colors">Em Dobra</button>
+                    <button class="px-3 py-1.5 bg-steel-800 text-slate-300 rounded-lg text-xs font-semibold hover:bg-brand-blue transition-colors">Em Solda</button>
+                </div>
+            </div>
+
+            <!-- TABELA DE ORDENS DE PRODUÇÃO -->
+            <div class="metal-card rounded-2xl border border-steel-700/80 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs text-slate-300">
+                        <thead class="bg-steel-900 border-b border-steel-800 text-slate-400 uppercase font-bold text-[10px] tracking-wider">
+                            <tr>
+                                <th class="p-4">Nº OP</th>
+                                <th class="p-4">Cliente</th>
+                                <th class="p-4">Especificação do Produto</th>
+                                <th class="p-4">Material</th>
+                                <th class="p-4">Qtd.</th>
+                                <th class="p-4">Etapa Atual</th>
+                                <th class="p-4">Prazo</th>
+                                <th class="p-4 text-right">Ação</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-steel-800/60 font-medium">
+                            <tr class="hover:bg-steel-800/40 transition-colors">
+                                <td class="p-4 font-bold text-brand-lightBlue">#OP-4092</td>
+                                <td class="p-4 text-white">AeroTech Indústria</td>
+                                <td class="p-4">Flanges de Encaixe 3/8" NPT</td>
+                                <td class="p-4">Inox 304 8mm</td>
+                                <td class="p-4">250 un.</td>
+                                <td class="p-4"><span class="bg-emerald-950 border border-emerald-700 text-emerald-400 px-2 py-0.5 rounded font-bold">Corte Laser</span></td>
+                                <td class="p-4 text-slate-300">Hoje, 18:00</td>
+                                <td class="p-4 text-right">
+                                    <button class="px-2.5 py-1 bg-steel-800 hover:bg-brand-blue text-white rounded transition-colors">Detalhes</button>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-steel-800/40 transition-colors">
+                                <td class="p-4 font-bold text-brand-lightBlue">#OP-4093</td>
+                                <td class="p-4 text-white">Metalúrgica Sul S/A</td>
+                                <td class="p-4">Perfis 'U' Dobrados para Chassis</td>
+                                <td class="p-4">Aço Carbono SAE 1020 6mm</td>
+                                <td class="p-4">80 un.</td>
+                                <td class="p-4"><span class="bg-amber-950 border border-amber-700 text-amber-400 px-2 py-0.5 rounded font-bold">Dobra CNC</span></td>
+                                <td class="p-4 text-slate-300">Amanhã, 12:00</td>
+                                <td class="p-4 text-right">
+                                    <button class="px-2.5 py-1 bg-steel-800 hover:bg-brand-blue text-white rounded transition-colors">Detalhes</button>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-steel-800/40 transition-colors">
+                                <td class="p-4 font-bold text-brand-lightBlue">#OP-4094</td>
+                                <td class="p-4 text-white">AgroMaq Equipamentos</td>
+                                <td class="p-4">Reservatório de Óleo Caldeirado</td>
+                                <td class="p-4">Chapa Carbono 4.75mm</td>
+                                <td class="p-4">12 un.</td>
+                                <td class="p-4"><span class="bg-blue-950 border border-blue-700 text-brand-lightBlue px-2 py-0.5 rounded font-bold">Solda TIG/MIG</span></td>
+                                <td class="p-4 text-slate-300">28/10/2026</td>
+                                <td class="p-4 text-right">
+                                    <button class="px-2.5 py-1 bg-steel-800 hover:bg-brand-blue text-white rounded transition-colors">Detalhes</button>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-steel-800/40 transition-colors">
+                                <td class="p-4 font-bold text-brand-lightBlue">#OP-4095</td>
+                                <td class="p-4 text-white">Construtora Boreal</td>
+                                <td class="p-4">Viga Estrutural Solada tipo 'I'</td>
+                                <td class="p-4">Viga W Gerdau / Chapas</td>
+                                <td class="p-4">40 un.</td>
+                                <td class="p-4"><span class="bg-purple-950 border border-purple-700 text-purple-400 px-2 py-0.5 rounded font-bold">Pintura Eletrostática</span></td>
+                                <td class="p-4 text-slate-300">30/10/2026</td>
+                                <td class="p-4 text-right">
+                                    <button class="px-2.5 py-1 bg-steel-800 hover:bg-brand-blue text-white rounded transition-colors">Detalhes</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- PÁGINA 3: MONITOR DE MÁQUINAS -->
+        <section id="page-maquinas" class="page-content hidden space-y-6">
+            <div class="border-b border-steel-800 pb-4">
+                <h1 class="text-2xl font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-gears text-brand-lightBlue"></i> Monitoramento de Máquinas & Equipamentos
+                </h1>
+                <p class="text-xs text-slate-400 mt-0.5">Telemetria e controle operacional das células de trabalho CNC.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Máquina 1 -->
+                <div class="metal-card rounded-2xl p-5 border border-steel-700 space-y-4">
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs font-bold text-slate-400">Corte a Laser</span>
+                        <span class="bg-emerald-950 border border-emerald-700 text-emerald-400 text-[10px] font-bold px-2 py-0.5 rounded">ONLINE</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-white">Laser Fiber 12kW (Laser-01)</h3>
+                    <div class="space-y-2 text-xs text-slate-300">
+                        <div class="flex justify-between"><span>Gás Assistente:</span><span class="font-bold text-white">Nitrogênio (N2)</span></div>
+                        <div class="flex justify-between"><span>Potência Atual:</span><span class="font-bold text-white">9.8 kW</span></div>
+                        <div class="flex justify-between"><span>Horas de Lente:</span><span class="font-bold text-white">142 hrs</span></div>
+                    </div>
+                    <div class="pt-3 border-t border-steel-800 flex justify-between items-center text-xs">
+                        <span class="text-slate-400">Temp. Chiller: 19.5°C</span>
+                        <button class="px-3 py-1 bg-steel-800 hover:bg-brand-blue text-white rounded">Telemetria</button>
+                    </div>
+                </div>
+
+                <!-- Máquina 2 -->
+                <div class="metal-card rounded-2xl p-5 border border-steel-700 space-y-4">
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs font-bold text-slate-400">Dobra CNC</span>
+                        <span class="bg-amber-950 border border-amber-700 text-amber-400 text-[10px] font-bold px-2 py-0.5 rounded">SETUP</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-white">Dobradeira 400T (Dobra-02)</h3>
+                    <div class="space-y-2 text-xs text-slate-300">
+                        <div class="flex justify-between"><span>Força Aplicada:</span><span class="font-bold text-white">120 Ton</span></div>
+                        <div class="flex justify-between"><span>Ferramenta:</span><span class="font-bold text-white">V-Block 50mm</span></div>
+                        <div class="flex justify-between"><span>Ajuste de Ângulo:</span><span class="font-bold text-white">Laser Activo</span></div>
+                    </div>
+                    <div class="pt-3 border-t border-steel-800 flex justify-between items-center text-xs">
+                        <span class="text-slate-400">Pressão Hidráulica: OK</span>
+                        <button class="px-3 py-1 bg-steel-800 hover:bg-brand-blue text-white rounded">Telemetria</button>
+                    </div>
+                </div>
+
+                <!-- Máquina 3 -->
+                <div class="metal-card rounded-2xl p-5 border border-steel-700 space-y-4">
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs font-bold text-slate-400">Usinagem</span>
+                        <span class="bg-red-950 border border-red-700 text-red-400 text-[10px] font-bold px-2 py-0.5 rounded">MANUTENÇÃO</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-white">Centro Usinagem (CNC-01)</h3>
+                    <div class="space-y-2 text-xs text-slate-300">
+                        <div class="flex justify-between"><span>Causa:</span><span class="font-bold text-red-400">Quebra de Broca</span></div>
+                        <div class="flex justify-between"><span>Técnico:</span><span class="font-bold text-white">Marcos Silva</span></div>
+                        <div class="flex justify-between"><span>Previsão Retorno:</span><span class="font-bold text-white">30 min</span></div>
+                    </div>
+                    <div class="pt-3 border-t border-steel-800 flex justify-between items-center text-xs">
+                        <span class="text-slate-400">Spindle: Parado</span>
+                        <button class="px-3 py-1 bg-steel-800 hover:bg-brand-blue text-white rounded">Chamado</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PÁGINA 4: ESTOQUE DE MATÉRIA-PRIMA -->
+        <section id="page-estoque" class="page-content hidden space-y-6">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-steel-800 pb-4">
+                <div>
+                    <h1 class="text-2xl font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-boxes-stacked text-brand-lightBlue"></i> Controle de Estoque de Chapas e Perfis
+                    </h1>
+                    <p class="text-xs text-slate-400 mt-0.5">Rastreabilidade e contagem de lotes em almoxarifado.</p>
+                </div>
+                <button class="px-4 py-2 bg-steel-800 hover:bg-brand-blue text-white font-bold text-xs rounded-lg transition-colors flex items-center gap-2">
+                    <i class="fa-solid fa-download"></i> Exportar Relatório
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="metal-card rounded-xl p-5 border border-steel-700">
+                    <h4 class="text-xs uppercase font-bold text-slate-400 mb-2">Chapas Aço Carbono</h4>
+                    <p class="text-2xl font-extrabold text-white">42.8 Toneladas</p>
+                    <p class="text-xs text-emerald-400 mt-1">Estoque Regular</p>
+                </div>
+                <div class="metal-card rounded-xl p-5 border border-steel-700">
+                    <h4 class="text-xs uppercase font-bold text-slate-400 mb-2">Chapas Aço Inoxidável</h4>
+                    <p class="text-2xl font-extrabold text-amber-400">8.2 Toneladas</p>
+                    <p class="text-xs text-amber-400 mt-1">Nível Baixo (Inox 316L)</p>
+                </div>
+                <div class="metal-card rounded-xl p-5 border border-steel-700">
+                    <h4 class="text-xs uppercase font-bold text-slate-400 mb-2">Tubos e Perfilados</h4>
+                    <p class="text-2xl font-extrabold text-white">19.5 Toneladas</p>
+                    <p class="text-xs text-emerald-400 mt-1">Estoque Regular</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- PÁGINA 5: QUALIDADE & ISO -->
+        <section id="page-qualidade" class="page-content hidden space-y-6">
+            <div class="border-b border-steel-800 pb-4">
+                <h1 class="text-2xl font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-circle-check text-brand-lightBlue"></i> Controle de Qualidade & Certificação ISO 9001
+                </h1>
+                <p class="text-xs text-slate-400 mt-0.5">Inspeções dimensionais, ensaios não-destrutivos e liberação de lotes.</p>
+            </div>
+
+            <div class="metal-card rounded-2xl p-6 border border-steel-700 space-y-4">
+                <h3 class="text-lg font-bold text-white">Relatórios de Inspeção Dimensional Recentes</h3>
+                <p class="text-xs text-slate-300">Todas as peças fabricadas passam por medição via braço tridimensional ou calibrador de folga antes da liberação final.</p>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                    <div class="bg-steel-900 p-4 rounded-xl border border-steel-800">
+                        <span class="text-xs text-emerald-400 font-bold uppercase">Aprovado</span>
+                        <h4 class="text-sm font-bold text-white mt-1">Lote #9921 - Flanges Inox</h4>
+                        <p class="text-xs text-slate-400 mt-1">Tolerância dimensional obtida: ±0.03mm (Dentro da especificação de ±0.05mm).</p>
+                    </div>
+                    <div class="bg-steel-900 p-4 rounded-xl border border-steel-800">
+                        <span class="text-xs text-emerald-400 font-bold uppercase">Aprovado</span>
+                        <h4 class="text-sm font-bold text-white mt-1">Lote #9918 - Vigas W Soladas</h4>
+                        <p class="text-xs text-slate-400 mt-1">Ensaio por Ultrassom em cordão de solda: 100% de penetração sem descontinuidades.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- MODAL PARA CADASTRAR NOVA OP -->
+    <div id="modal-op" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="metal-card rounded-2xl max-w-lg w-full p-6 border border-steel-700 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-steel-800 pb-3">
+                <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-plus-circle text-brand-lightBlue"></i> Cadastrar Nova Ordem de Produção
+                </h3>
+                <button onclick="closeNewOpModal()" class="text-slate-400 hover:text-white">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <form id="form-new-op" onsubmit="handleNewOp(event)" class="space-y-3 text-xs">
+                <div>
+                    <label class="block text-slate-300 font-semibold mb-1">Nome do Cliente / Empresa</label>
+                    <input type="text" required placeholder="Ex: Indústria Mecânica SP" class="w-full bg-steel-900 border border-steel-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-brand-blue">
+                </div>
+                <div>
+                    <label class="block text-slate-300 font-semibold mb-1">Descrição do Produto / Peça</label>
+                    <input type="text" required placeholder="Ex: Chapa Suporte com Dobra 90º" class="w-full bg-steel-900 border border-steel-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-brand-blue">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-slate-300 font-semibold mb-1">Material Especificado</label>
+                        <select class="w-full bg-steel-900 border border-steel-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-brand-blue">
+                            <option>Aço Carbono SAE 1020</option>
+                            <option>Aço Inox AISI 304</option>
+                            <option>Aço Inox AISI 316L</option>
+                            <option>Alumínio Naval</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-slate-300 font-semibold mb-1">Quantidade (Peças)</label>
+                        <input type="number" required min="1" value="50" class="w-full bg-steel-900 border border-steel-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-brand-blue">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-slate-300 font-semibold mb-1">Máquina Inicial Alocada</label>
+                    <select class="w-full bg-steel-900 border border-steel-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-brand-blue">
+                        <option>Laser Fiber 12kW (Laser-01)</option>
+                        <option>Laser Fiber 6kW (Laser-02)</option>
+                        <option>Dobradeira 400T (Dobra-02)</option>
+                    </select>
+                </div>
+
+                <div class="pt-4 flex gap-3">
+                    <button type="button" onclick="closeNewOpModal()" class="w-1/2 py-2.5 bg-steel-800 hover:bg-steel-700 text-slate-300 font-semibold rounded-xl">Cancelar</button>
+                    <button type="submit" class="w-1/2 py-2.5 bg-brand-blue hover:bg-brand-lightBlue text-white font-bold rounded-xl shadow-lg">Gerar OP</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- RODAPÉ TÉCNICO -->
+    <footer class="bg-steel-950 border-t border-steel-800 text-slate-500 text-[11px] py-4 px-6 mt-auto">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-2">
+            <span>&copy; 2026 AçoSmart - Sistema de Gerenciamento Industrial Interno</span>
+            <div class="flex gap-4">
+                <span>Servidor: <strong class="text-slate-400">PRD-SP-01</strong></span>
+                <span>Latência: <strong class="text-emerald-400">12ms</strong></span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- LÓGICA EM JAVASCRIPT -->
+    <script>
+        // Função de navegação entre páginas do sistema interno
+        function switchPage(pageId) {
+            const pages = document.querySelectorAll('.page-content');
+            pages.forEach(page => {
+                page.classList.add('hidden');
+                page.classList.remove('block');
+            });
+
+            const selectedPage = document.getElementById('page-' + pageId);
+            if(selectedPage) {
+                selectedPage.classList.remove('hidden');
+                selectedPage.classList.add('block');
+            }
+
+            // Atualiza botões do menu superior
+            const navButtons = document.querySelectorAll('.nav-btn');
+            navButtons.forEach(btn => {
+                btn.classList.remove('text-brand-lightBlue', 'bg-steel-800', 'border-b-2', 'border-brand-blue');
+                btn.classList.add('text-slate-300');
+            });
+
+            const activeBtn = document.getElementById('nav-' + pageId);
+            if(activeBtn) {
+                activeBtn.classList.remove('text-slate-300');
+                activeBtn.classList.add('text-brand-lightBlue', 'bg-steel-800', 'border-b-2', 'border-brand-blue');
+            }
+        }
+
+        // Toggle do Menu Mobile
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        }
+
+        // Modal de Nova OP
+        function openNewOpModal() {
+            document.getElementById('modal-op').classList.remove('hidden');
+        }
+
+        function closeNewOpModal() {
+            document.getElementById('modal-op').classList.hidden = true;
+            document.getElementById('modal-op').classList.add('hidden');
+        }
+
+        function handleNewOp(e) {
+            e.preventDefault();
+            alert('Nova Ordem de Produção criada com sucesso na AçoSmart!');
+            closeNewOpModal();
+        }
+
+        // Relógio do Sistema em Tempo Real
+        function updateClock() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('pt-BR');
+            document.getElementById('current-time').innerText = timeString;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+    </script>
+</body>
+</html>
